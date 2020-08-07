@@ -2,13 +2,16 @@
 #include "Graphics/Texture.h"
 #include "Graphics/Renderer.h"
 #include "Resources/ResourceManager.h"
+#include "Input/InputSystem.h"
+
 
 nc::ResourceManager resourceManager;
 nc::Renderer renderer;
-
+nc::InputSystem inputSystem;
 int main(int, char**)
 {
 	renderer.Startup();
+	inputSystem.Startup();
 	renderer.Create("GAT150",800,600);
 
 	//load texture
@@ -17,6 +20,8 @@ int main(int, char**)
 	nc::Texture* texture2 = resourceManager.Get<nc::Texture>("sf2.bmp", &renderer);
 
 	float angle{ 0 };
+	nc::Vector2 position = nc::Vector2 { 400,300 };
+
 
 	SDL_Event event;
 	bool quit = false;
@@ -32,14 +37,34 @@ int main(int, char**)
 		}
 		renderer.BeginFrame();
 
+		inputSystem.Update();
+
 		angle = angle + 0.1f;
 
-		texture1->Draw({ 500,100 }, { 2.0f,2.0f }, angle);
-		texture2->Draw({ 200,300 }, { 3.0f,3.0f }, angle + 90);
+		
+		texture2->Draw(position, { 1,1 }, angle);
+
+		if (inputSystem.GetButtonState(SDL_SCANCODE_LEFT) == nc::InputSystem::eButtonState::HELD) 
+		{ 
+			position.x = position.x - 5.0f; 
+		}
+		if (inputSystem.GetButtonState(SDL_SCANCODE_RIGHT) == nc::InputSystem::eButtonState::HELD)
+		{ 
+			position.x = position.x + 5.0f; 
+		}
+		if (inputSystem.GetButtonState(SDL_SCANCODE_UP) == nc::InputSystem::eButtonState::HELD)
+		{
+			position.y = position.y - 5.0f;
+		}
+		if (inputSystem.GetButtonState(SDL_SCANCODE_DOWN) == nc::InputSystem::eButtonState::HELD)
+		{
+			position.y = position.y + 5.0f;
+		}
 
 		renderer.EndFrame();
 	}
 
+	inputSystem.Shutdown();
 	renderer.Shutdown();
 	SDL_Quit();
 
