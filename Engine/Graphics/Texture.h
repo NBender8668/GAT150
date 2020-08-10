@@ -14,6 +14,7 @@ namespace nc
 		void Destory() override;
 
 		void Draw(const Vector2& position, const Vector2& scale, float angle);
+		void Draw(const SDL_Rect& source ,const Vector2& position, const Vector2& scale, float angle);
 
 		Vector2 GetSize();
 
