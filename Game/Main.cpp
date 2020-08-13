@@ -1,16 +1,15 @@
 #include"pch.h"
+#include "Math/Color (2).h"
 #include "Graphics/Texture.h"
-#include "Graphics/Renderer.h"
-#include "Resources/ResourceManager.h"
-#include "Input/InputSystem.h"
-#include "Core/Timer.h"
+#include "Objects/GameObject.h"
+#include "Components/PhysicsComponents.h"
+#include "Components/SpriteComponent.h"
+#include "Components/PlayerComponent.h"
+#include "Core/Json.h"
+#include "Engine.h"
 
-
-nc::ResourceManager resourceManager;
-nc::Renderer renderer;
-nc::InputSystem inputSystem;
-nc::FrameTimer timer;
-
+nc::Engine engine;
+nc::GameObject player;
 
 int main(int, char**)
 {
@@ -19,21 +18,64 @@ int main(int, char**)
 
 	//for (size_t i = 0; i < 100; i++){std::sqrt(rand() % 100);}
 	//std::cout << timer.ElapsedSeconds() << std::endl;
-	
+	engine.Startup();
 
-	renderer.Startup();
-	inputSystem.Startup();
-	renderer.Create("GAT150",800,600);
-	resourceManager.Startup();
+
+	player.Create(&engine);
+
+	player.m_transform.position = { 400,300 };
+	player.m_transform.angle = 45;
+
+	nc::Component* component = new nc::PhysicsComponent;
+	player.addComponent(component);
+	component->Create();
+
+	component = new nc::SpriteComponent;
+	player.addComponent(component);
+	component->Create();
+
+	component = new nc::PlayerComponent;
+	player.addComponent(component);
+	component->Create();
+
+
+	rapidjson::Document document;
+	nc::json::Load("json.txt", document);
+
+	std::string str;
+	nc::json::Get(document, "string", str);
+	std::cout << str << std::endl;
+
+	bool b;
+	nc::json::Get(document, "bool", b);
+	std::cout << b << std::endl;
+
+	int i1;
+	nc::json::Get(document, "integer1", i1);
+	std::cout << i1 << std::endl;
+
+	int i2;
+	nc::json::Get(document, "integer2", i2);
+	std::cout << i2 << std::endl;
+
+	float f;
+	nc::json::Get(document, "float", f);
+	std::cout << f << std::endl;
+
+	nc::Vector2 v2;
+	nc::json::Get(document, "vector2", v2);
+	std::cout << v2 << std::endl;
+
+	nc::Color color;
+	nc::json::Get(document, "color", color);
+	std::cout << color << std::endl;
+
+
+
+
 
 	//load texture
-
-	nc::Texture* car = resourceManager.Get<nc::Texture>("cars.png", &renderer);
-	nc::Texture* background = resourceManager.Get<nc::Texture>("background.png", &renderer);
-
-	float angle{ 0 };
-	nc::Vector2 position = nc::Vector2 { 400,300 };
-
+	nc::Texture* background = engine.GetSystem<nc::ResourceManager>()->Get<nc::Texture>("background.png", engine.GetSystem<nc::Renderer>());
 
 	SDL_Event event;
 	bool quit = false;
@@ -47,45 +89,32 @@ int main(int, char**)
 			quit = true;
 			break;
 		}
-		renderer.BeginFrame();
 
-		timer.Tick();
-		inputSystem.Update();
+		engine.GetSystem<nc::Renderer>()->BeginFrame();
 
-		angle = angle + 180 * timer.DeltaTimer();
+	
+		engine.Update();
+		player.Update();
 
-		
+
+		//draw
 		background->Draw({0,0}, { 1,1 }, 0);
-		car->Draw({0,16,64,144}, position, { 1,1 }, 0);
 
-		if (inputSystem.GetButtonState(SDL_SCANCODE_ESCAPE) == nc::InputSystem::eButtonState::PRESSED)
+		player.Draw();
+
+		//player controller
+
+		if (engine.GetSystem<nc::InputSystem>()->GetButtonState(SDL_SCANCODE_ESCAPE) == nc::InputSystem::eButtonState::PRESSED)
 		{
 			quit = true;
 		}
+		
 
-		if (inputSystem.GetButtonState(SDL_SCANCODE_LEFT) == nc::InputSystem::eButtonState::HELD) 
-		{ 
-			position.x = position.x - 200.0f *timer.DeltaTimer(); 
-		}
-		if (inputSystem.GetButtonState(SDL_SCANCODE_RIGHT) == nc::InputSystem::eButtonState::HELD)
-		{ 
-			position.x = position.x + 200.0f * timer.DeltaTimer();
-		}
-		if (inputSystem.GetButtonState(SDL_SCANCODE_UP) == nc::InputSystem::eButtonState::HELD)
-		{
-			position.y = position.y - 200.0f * timer.DeltaTimer();
-		}
-		if (inputSystem.GetButtonState(SDL_SCANCODE_DOWN) == nc::InputSystem::eButtonState::HELD)
-		{
-			position.y = position.y + 200.0f * timer.DeltaTimer();
-		}
-
-		renderer.EndFrame();
+		engine.GetSystem<nc::Renderer>()->EndFrame();
 	}
-	resourceManager.Shutdown();
-	inputSystem.Shutdown();
-	renderer.Shutdown();
-	SDL_Quit();
+
+	engine.Shutdown();
+	
 
 	return 0;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL.h>
 #include <windows.h>
 namespace nc
 {
@@ -41,6 +42,7 @@ namespace nc
 		operator SDL_Color() const { return pack888(); };
 		
 		friend std::istream& operator >> (std::istream& stream, Color& c);
+		friend std::ostream& operator<<(std::ostream& stream, Color& c);
 	
 		static const Color white;
 		static const Color red;
