@@ -8,7 +8,7 @@ namespace nc
 	public:
 		
 		virtual bool Create(void* data = nullptr) override;
-		virtual void Destory() override;
+		virtual void Destroy() override;
 
 		virtual void Update() override;
 

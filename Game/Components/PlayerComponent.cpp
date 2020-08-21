@@ -4,11 +4,12 @@
 
 bool nc::PlayerComponent::Create(void* data)
 {
+	m_owner = static_cast<GameObject*>(data);
 
 	return true;
 }
 
-void nc::PlayerComponent::Destory()
+void nc::PlayerComponent::Destroy()
 {
 }
 
@@ -28,10 +29,10 @@ void nc::PlayerComponent::Update()
 	{
 		m_owner->m_transform.position.y = m_owner->m_transform.position.y - 200.0f * m_owner->m_engine->GetTimer().DeltaTimer();
 	}
-	if (m_owner->m_engine->GetSystem<nc::InputSystem>()->GetButtonState(SDL_SCANCODE_DOWN) == nc::InputSystem::eButtonState::HELD)
-	{
-		m_owner->m_transform.position.y = m_owner->m_transform.position.y + 200.0f * m_owner->m_engine->GetTimer().DeltaTimer();
-	}
+	//if (m_owner->m_engine->GetSystem<nc::InputSystem>()->GetButtonState(SDL_SCANCODE_DOWN) == nc::InputSystem::eButtonState::HELD)
+	//{
+	//	m_owner->m_transform.position.y = m_owner->m_transform.position.y + 200.0f * m_owner->m_engine->GetTimer().DeltaTimer();
+	//}
 
 
 	nc::Vector2 force{ 0,0 };

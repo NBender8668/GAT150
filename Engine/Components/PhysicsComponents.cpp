@@ -4,12 +4,13 @@
 
 bool nc::PhysicsComponent::Create(void* data)
 {
+	m_owner = static_cast<GameObject*>(data);
 	m_drag = 0.95f;
 
 	return true;
 }
 
-void nc::PhysicsComponent::Destory()
+void nc::PhysicsComponent::Destroy()
 {
 
 }

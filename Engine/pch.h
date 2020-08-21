@@ -12,7 +12,9 @@
 #include "Math/Math.h"
 #include "Math/Random.h"
 #include "Math/Transform.h"
+#include "Core/Assert.h"
 #include "Math/Color (2).h"
+
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -24,5 +26,7 @@
 #include <list>
 #include <map>
 #include <chrono>
+#include <cassert>
+#include <functional>
 
 #endif //PCH_H

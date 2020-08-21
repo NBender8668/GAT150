@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Components/Component.h"
 #include "Components/RenderComponent.h"
+#include "ObjectFactory.h"
 
 namespace nc
 {
@@ -12,9 +13,51 @@ namespace nc
 		return true;
 	}
 
-	void GameObject::Destory()
+	void GameObject::Destroy()
 	{
 		removeAllComponents();
+	}
+
+	void GameObject::Read(const rapidjson::Value& value)
+	{
+		nc::json::Get(value, "name", m_name);
+		nc::json::Get(value, "position", m_transform.position);
+		nc::json::Get(value, "scale", m_transform.scale);
+		nc::json::Get(value, "angle", m_transform.angle);
+
+		const rapidjson::Value& componentsValue = value["Components"];
+		if (componentsValue.IsArray())
+		{
+			ReadComponents(componentsValue);
+		}
+
+
+	}
+
+	void GameObject::ReadComponents(const rapidjson::Value& value)
+	{
+		for (rapidjson::SizeType i = 0; i < value.Size(); i++)
+		{
+			const rapidjson::Value& componentValue = value[i];
+			if (componentValue.IsObject())
+			{
+				std::string typeName;
+				// read component “type” name from json (Get)
+				nc::json::Get(componentValue, "type", typeName);
+
+				Component* component = nc::ObjectFactory::Instance().Create<nc::Component>(typeName);
+					if (component)
+					{
+						// call component create, pass in gameobject (this)
+						component->Create(this);
+						// call component read
+						component->Read(componentValue);
+						// add component to game object
+						GameObject::addComponent(component);
+					}
+			}
+		}
+
 	}
 
 	void GameObject::Update()
@@ -38,8 +81,6 @@ namespace nc
 
 	void GameObject::addComponent(Component* component)
 	{
-		component->m_owner = this;
-
 		m_components.push_back(component);
 	}
 
@@ -48,7 +89,7 @@ namespace nc
 		auto iter = std::find(m_components.begin(), m_components.end(), component);
 		if (iter != m_components.end())
 		{
-			(*iter)->Destory();
+			(*iter)->Destroy();
 			delete(*iter);
 		}
 	}
@@ -57,7 +98,7 @@ namespace nc
 	{
 		for (auto component : m_components)
 		{
-			component->Destory();
+			component->Destroy();
 			delete component;
 		}
 		m_components.clear();
