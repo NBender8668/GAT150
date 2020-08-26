@@ -1,8 +1,10 @@
 #pragma once
 #include "Graphics/Renderer.h"
 #include "Resources/ResourceManager.h"
+#include "Physics/PhysicsSystem.h"
 #include "Input/InputSystem.h"
 #include "Core/Timer.h"
+#include "Audio/AudioSystem.h"
 #include <vector>
 
 namespace nc

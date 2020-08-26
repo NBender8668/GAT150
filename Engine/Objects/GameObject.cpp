@@ -6,6 +6,25 @@
 
 namespace nc
 {
+	GameObject::GameObject(const GameObject& other)
+	{
+		m_name = other.m_name;
+		m_tag = other.m_tag;
+		m_lifetime = other.m_lifetime;
+
+		m_flags = other.m_flags;
+
+		m_transform = other.m_transform;
+		m_engine = other.m_engine;
+
+		for (Component* component : other.m_components)
+		{
+			Component* clone = dynamic_cast<Component*>(component->Clone());
+			clone->m_owner = this;
+			addComponent(clone);
+		}
+	}
+
 	bool GameObject::Create(void* data )
 	{
 		m_engine = static_cast<Engine*>(data);
@@ -21,14 +40,25 @@ namespace nc
 	void GameObject::Read(const rapidjson::Value& value)
 	{
 		nc::json::Get(value, "name", m_name);
+		nc::json::Get(value, "tag:", m_tag);
+		nc::json::Get(value, "lifetime", m_lifetime);
+
+		bool transient = m_flags[eFlags::TRANSIENT];
+		nc::json::Get(value, "transient", transient);
+		m_flags[eFlags::TRANSIENT] = transient;
+
 		nc::json::Get(value, "position", m_transform.position);
 		nc::json::Get(value, "scale", m_transform.scale);
 		nc::json::Get(value, "angle", m_transform.angle);
 
-		const rapidjson::Value& componentsValue = value["Components"];
-		if (componentsValue.IsArray())
+		if (value.HasMember("Components"))
 		{
-			ReadComponents(componentsValue);
+			const rapidjson::Value& componentsValue = value["Components"];
+			if (componentsValue.IsArray())
+			{
+				ReadComponents(componentsValue);
+			}
+
 		}
 
 
@@ -66,6 +96,13 @@ namespace nc
 		{
 			component->Update();
 		}
+
+		if (m_flags[eFlags::TRANSIENT])
+		{
+			m_lifetime = m_lifetime - m_engine->GetTimer().DeltaTimer();
+			m_flags[eFlags::DESTORY] = (m_lifetime <= 0);
+			
+		}
 	}
 
 	void GameObject::Draw()
@@ -77,6 +114,16 @@ namespace nc
 			component->Draw();
 		}
 		
+	}
+
+	void GameObject::BeginContact(GameObject* gameObject)
+	{
+		std::cout << "Begin: " << gameObject->m_name << std::endl;
+	}
+
+	void GameObject::EndContact(GameObject* gameObject)
+	{
+		std::cout << "End: " << gameObject->m_name << std::endl;
 	}
 
 	void GameObject::addComponent(Component* component)

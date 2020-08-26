@@ -14,13 +14,14 @@ namespace nc
 		virtual void Destroy() override;
 
 		void Read(const rapidjson::Value& value) override;
+		void ReadPrototypes(const rapidjson::Value& value);
+		void ReadGameObjects(const rapidjson::Value& value);
 
 		void Update();
 		void Draw();
 
-		void ReadGameObjects(const rapidjson::Value& value);
-
 		GameObject* Find(const std::string& name);
+		std::vector<GameObject*> FindGameObjectsWithTag(const std:: string& tag);
 
 		void AddGameObject(GameObject* gameObject);
 		void RemoveGameObject(GameObject* gameObject);

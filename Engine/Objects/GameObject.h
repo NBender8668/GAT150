@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Math/Transform.h"
 #include "Engine.h"
+#include <bitset>
 #include <vector>
 namespace nc
 {
@@ -10,9 +11,23 @@ namespace nc
 	class GameObject : public Object
 	{
 	public:
+		enum eFlags
+		{
+			ACTIVE,
+			VISIBLE,
+			DESTORY,
+			TRANSIENT
+		};
+
+	public:
+
+		GameObject() = default;
+		GameObject(const GameObject& other);
 
 		virtual bool Create(void* data = nullptr) override;
 		virtual void Destroy() override;
+		virtual Object* Clone() override { return new GameObject{ *this }; };
+	
 
 		void Read(const rapidjson::Value& value) override;
 
@@ -20,6 +35,9 @@ namespace nc
 
 		void Update();
 		void Draw();
+
+		void BeginContact(GameObject* gameObject);
+		void EndContact(GameObject* gameObject);
 
 		template<typename T>
 		T* GetComponent()
@@ -42,8 +60,13 @@ namespace nc
 		
 	public:
 		std::string m_name;
+		std::string m_tag;
+		float m_lifetime{ 0 };
+
+		std::bitset<32>m_flags;
+
 		Transform m_transform;
-		Engine* m_engine;
+		Engine* m_engine{nullptr};
 
 	protected:
 		std::vector<Component*> m_components;

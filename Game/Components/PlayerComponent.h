@@ -9,6 +9,7 @@ namespace nc
 
 		virtual bool Create(void* data = nullptr) override;
 		virtual void Destroy() override;
+		virtual Object* Clone() override { return new PlayerComponent{ *this }; };
 
 		virtual void Update() override;
 
