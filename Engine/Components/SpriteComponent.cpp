@@ -30,5 +30,5 @@ void nc::SpriteComponent::Draw()
 {
 	Texture* texture = m_owner->m_engine->GetSystem<nc::ResourceManager>()->Get<nc::Texture>(m_textureName, m_owner->m_engine->GetSystem<nc::Renderer>());
 
-	texture->Draw(m_rect, m_owner->m_transform.position, m_owner->m_transform.angle, { 1,1 }, m_origin);
+	texture->Draw(m_rect, m_owner->m_transform.position, m_owner->m_transform.angle, { 1,1 }, m_origin, m_flip);
 }

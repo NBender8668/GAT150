@@ -2,38 +2,30 @@
 #include "PhysicsSystem.h"
 #include "ContactListener.h"
 
-b2Body* nc::PhysicsSystem::CreateBody(const Vector2& position, const Vector2& size, float density, bool isDynamic)
-{
-	b2BodyDef bodyDef;  
 
-	bodyDef.type = (isDynamic) ? b2_dynamicBody : b2_staticBody;        
-	bodyDef.position.Set(position.x, position.y);        
-	b2Body* body = m_world->CreateBody(&bodyDef);   
 
-	b2PolygonShape shape;        
-	shape.SetAsBox(size.x, size.y);        
-	body->CreateFixture(&shape, density);        
-	return body;
-}
-
-b2Body* nc::PhysicsSystem::CreateBody(const Vector2& position, const RigidBodyData& data, GameObject* gameObject)
+b2Body* nc::PhysicsSystem::CreateBody(const Vector2& position, float angle, const RigidBodyData& data, GameObject* gameObject)
 {
 	b2BodyDef bodyDef;
 
+	Vector2 world = PhysicsSystem::ScreenToWorld(position);
+
 	bodyDef.type = (data.isDynamic) ? b2_dynamicBody : b2_staticBody;
-	bodyDef.position.Set(position.x, position.y);
+	bodyDef.position.Set(world.x, world.y);
+	bodyDef.angle = DegreesToRadians(angle);
 	bodyDef.fixedRotation = data.lockAngle;
 	b2Body* body = m_world->CreateBody(&bodyDef);
 	
 	b2PolygonShape shape;
-	
-	shape.SetAsBox(data.size.x, data.size.y);
+	Vector2 worldsize = PhysicsSystem::ScreenToWorld(data.size);
+	shape.SetAsBox(worldsize.x, worldsize.y);
 	
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &shape;
 	fixtureDef.density = data.density;
 	fixtureDef.friction = data.friction;
 	fixtureDef.restitution = data.restitution;
+	fixtureDef.isSensor = data.isSensor;
 	fixtureDef.userData = gameObject;
 
 	body->CreateFixture(&fixtureDef);
@@ -41,9 +33,14 @@ b2Body* nc::PhysicsSystem::CreateBody(const Vector2& position, const RigidBodyDa
 	return body;
 }
 
+void nc::PhysicsSystem::DestoryBody(b2Body* body)
+{
+	m_world->DestroyBody(body);
+}
+
 bool nc::PhysicsSystem::Startup()
 {
-	b2Vec2 gravity(0, 150);
+	b2Vec2 gravity(0, 20);
 	
 	m_world = new b2World{ gravity };
 

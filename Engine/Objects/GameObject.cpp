@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Components/Component.h"
 #include "Components/RenderComponent.h"
+#include "Scene.h"
 #include "ObjectFactory.h"
 
 namespace nc
@@ -16,6 +17,7 @@ namespace nc
 
 		m_transform = other.m_transform;
 		m_engine = other.m_engine;
+		m_scene = other.m_scene;
 
 		for (Component* component : other.m_components)
 		{
@@ -27,7 +29,8 @@ namespace nc
 
 	bool GameObject::Create(void* data )
 	{
-		m_engine = static_cast<Engine*>(data);
+		m_scene = static_cast<Scene*>(data);
+		m_engine = m_scene->m_engine;
 
 		return true;
 	}
@@ -40,7 +43,7 @@ namespace nc
 	void GameObject::Read(const rapidjson::Value& value)
 	{
 		nc::json::Get(value, "name", m_name);
-		nc::json::Get(value, "tag:", m_tag);
+		nc::json::Get(value, "tag", m_tag);
 		nc::json::Get(value, "lifetime", m_lifetime);
 
 		bool transient = m_flags[eFlags::TRANSIENT];
@@ -118,12 +121,41 @@ namespace nc
 
 	void GameObject::BeginContact(GameObject* gameObject)
 	{
-		std::cout << "Begin: " << gameObject->m_name << std::endl;
+		m_contacts.push_back(gameObject);
+
+		Event event;
+		event.type = "CollisionEnter";
+		event.sender = gameObject;
+		event.receiver = this;
+
+		EventManager::Instance().Notify(event);
 	}
 
 	void GameObject::EndContact(GameObject* gameObject)
 	{
-		std::cout << "End: " << gameObject->m_name << std::endl;
+		m_contacts.remove(gameObject);
+
+		Event event;
+		event.type = "CollisionExit";
+		event.sender = gameObject;
+		event.receiver = this;
+
+		EventManager::Instance().Notify(event);
+	}
+
+	std::vector<GameObject*> GameObject::GetObjectWithTag(const std::string& tags)
+	{
+		std::vector<GameObject*> contacts;
+
+		for (auto contact : m_contacts)
+		{
+			if (contact->m_tag == tags)
+			{
+				contacts.push_back(contact);
+			}
+		}
+
+		return contacts;
 	}
 
 	void GameObject::addComponent(Component* component)

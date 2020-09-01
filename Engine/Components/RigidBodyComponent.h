@@ -15,7 +15,7 @@ namespace nc
 		void Read(const rapidjson::Value& value);
 		virtual void Update() override;
 
-		void SetForce(const Vector2& force) override;
+		void ApplyForce(const Vector2& force) override;
 
 
 	protected:

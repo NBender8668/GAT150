@@ -7,6 +7,7 @@
 namespace nc
 {
 	class Component;
+	class Scene;
 
 	class GameObject : public Object
 	{
@@ -38,6 +39,7 @@ namespace nc
 
 		void BeginContact(GameObject* gameObject);
 		void EndContact(GameObject* gameObject);
+		std::vector<GameObject*> GetObjectWithTag(const std::string& tags);
 
 		template<typename T>
 		T* GetComponent()
@@ -67,9 +69,10 @@ namespace nc
 
 		Transform m_transform;
 		Engine* m_engine{nullptr};
+		Scene* m_scene{ nullptr };
 
 	protected:
 		std::vector<Component*> m_components;
-
+		std::list<GameObject*> m_contacts;
 	};
 }

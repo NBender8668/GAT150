@@ -17,8 +17,9 @@ void nc::Sound::Destory()
     if (m_sound)
     {
         m_sound->release();
+        
     }
-
+    
 }
 
 nc::AudioChannel nc::Sound::Play(bool loop)
